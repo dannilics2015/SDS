@@ -5,6 +5,6 @@ java MyClient thread_number, input_file_name, ip, port
 
 - example:
 javac MyClient.java
-java MyClient 100, /Desktop/User/myFile.csv http://120.0.0.1, 8080
+java MyClient 100, /Desktop/User/myFile.csv, http://120.0.0.1, 8080
 
 If arguments are not given, default value will be used.
