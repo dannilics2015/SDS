@@ -17,6 +17,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class MyClient {
 
     private static BlockingQueue<MyRecord> blockingQueue = new LinkedBlockingQueue<>();
+
     private final static Logger LOGGER = Logger.getLogger(MyClient.class.getName());
 
     public static void main(String[] args) throws InterruptedException, ExecutionException, IOException {
@@ -87,9 +88,13 @@ public class MyClient {
         int successfulRequestFromPost = 0;
         Map<Long, Long> latencyListFromPost = new HashMap<>();
         for (Future<Result> result : resultsFromPost) {
-            numberRequestsFromPost += result.get().getNumberRequests();
-            successfulRequestFromPost += result.get().getSuccessfulRequests();
-            latencyListFromPost.putAll(result.get().getLatency());
+            try {
+                numberRequestsFromPost += result.get().getNumberRequests();
+                successfulRequestFromPost += result.get().getSuccessfulRequests();
+                latencyListFromPost.putAll(result.get().getLatency());
+            } catch (Exception e) {
+                System.out.print("Errors: " + e.getMessage());
+            }
         }
         statisticsFromPost.setLatency(latencyListFromPost);
         statisticsFromPost.setNumberRequests(numberRequestsFromPost);
@@ -109,7 +114,8 @@ public class MyClient {
                 "The 95th percentile latency is: " +
                 sortedLatencyListFromPost.get((int) (sortedLatencyListFromPost.size() * 0.95)) + milliseconds + "\n" +
                 "The 99th percentile latency is: " +
-                sortedLatencyListFromPost.get((int) (sortedLatencyListFromPost.size() * 0.99)) + milliseconds);
+                sortedLatencyListFromPost.get((int) (sortedLatencyListFromPost.size() * 0.99)) + milliseconds + "\n" +
+                "number of error requests is: " + ServerErrorCaptureTask.errorsFromPost);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -118,9 +124,11 @@ public class MyClient {
         int successfulRequestFromGet = 0;
         Map<Long, Long> latencyListFromGet = new HashMap<>();
         for (Future<Result> result : resultsFromGet) {
-            numberRequestsFromGet += result.get().getNumberRequests();
-            successfulRequestFromGet += result.get().getSuccessfulRequests();
-            latencyListFromGet.putAll(result.get().getLatency());
+            if(result.get() != null) {
+                numberRequestsFromGet += result.get().getNumberRequests();
+                successfulRequestFromGet += result.get().getSuccessfulRequests();
+                latencyListFromGet.putAll(result.get().getLatency());
+            }
         }
         statisticsFromGet.setLatency(latencyListFromGet);
         statisticsFromGet.setNumberRequests(numberRequestsFromGet);
@@ -140,7 +148,8 @@ public class MyClient {
                 "The 95th percentile latency is: " +
                 sortedLatencyListFromGet.get((int) (sortedLatencyListFromGet.size() * 0.95)) + milliseconds + "\n" +
                 "The 99th percentile latency is: " +
-                sortedLatencyListFromGet.get((int) (sortedLatencyListFromGet.size() * 0.99)) + milliseconds);
+                sortedLatencyListFromGet.get((int) (sortedLatencyListFromGet.size() * 0.99)) + milliseconds + "\n" +
+                "number of error requests is: " + ServerErrorCaptureTask.errorsFromGet);
 
         LOGGER.info("POST all skier data & GET all vert data takes: " + wallTime + milliseconds);
 

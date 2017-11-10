@@ -24,6 +24,7 @@ public class PostRecordTask implements Callable<Result> {
     private String ipAddress;
     private List<MyRecord> myRecordList;
 
+
     private final static Logger LOGGER = Logger.getLogger(PostRecordTask.class.getName());
 
     public PostRecordTask(int iteratedTimes, String ip, List<MyRecord> myRecords) {
@@ -43,10 +44,12 @@ public class PostRecordTask implements Callable<Result> {
             long latency = threadEndTime - threadStartTime;
             statistics.getLatency().put(threadStartTime, latency);
             response.close();
-        } catch (ProcessingException e) {
-            LOGGER.warning("Processing Exception Error message: " + e.getMessage());
-        } catch (OutOfMemoryError e) {
-            LOGGER.warning("OutOfMemory Error message: " + e.getMessage());
+        } catch (Exception e) {
+            synchronized (this) {
+                ServerErrorCaptureTask.errorsFromPost++;
+            }
+            LOGGER.warning("Exception Error message: " + e.getMessage());
+//            e.printStackTrace();
         }
         return response;
 
@@ -57,10 +60,16 @@ public class PostRecordTask implements Callable<Result> {
         Client client = ClientBuilder.newClient(config);
         client.property(ClientProperties.CONNECT_TIMEOUT, 240000);
         WebTarget webTarget = client.target(ipAddress);
+        Response response = null;
         for (int i = 0; i < iterationTimes; i++) {
-            Response response = callPostRecord(webTarget, myRecordList, i);
-            statistics.addNumberRequest();
-            if (response.getStatus() == 201) {
+            try {
+                statistics.addNumberRequest();
+                response = callPostRecord(webTarget, myRecordList, i);
+            } catch (ProcessingException e) {
+                System.out.print(e.getMessage());
+            }
+
+            if (response != null && response.getStatus() == 201) {
                 statistics.addSuccessfulRequest();
             }
         }

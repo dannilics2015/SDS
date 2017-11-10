@@ -46,11 +46,10 @@ public class GetVertTask implements Callable<Result> {
             response.close();
 
         } catch (ProcessingException e) {
+            synchronized (this) {
+                ServerErrorCaptureTask.errorsFromGet++;
+            }
             LOGGER.warning("Error message: " + e.getMessage());
-            LOGGER.warning("Stack trace: " + e.getStackTrace());
-        } catch (OutOfMemoryError e) {
-            LOGGER.warning("Error message: " + e.getMessage());
-            LOGGER.warning("Stack trace: " + e.getStackTrace());
         }
         return response;
     }

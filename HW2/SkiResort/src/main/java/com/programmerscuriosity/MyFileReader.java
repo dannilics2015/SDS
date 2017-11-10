@@ -29,7 +29,7 @@ public class MyFileReader implements Runnable{
         try {
             bufferedReader = new BufferedReader(
                     new FileReader(fileName));
-            bufferedReader.readLine();
+//            bufferedReader.readLine();
             while ((line = bufferedReader.readLine()) != null) {
                 String[] record = line.split(splitStr);
                 MyRecord myRecord = new MyRecord();

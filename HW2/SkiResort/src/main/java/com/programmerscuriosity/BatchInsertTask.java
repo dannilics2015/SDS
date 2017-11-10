@@ -3,6 +3,7 @@ package com.programmerscuriosity;
 import model.MyRecord;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -26,17 +27,24 @@ public class BatchInsertTask implements Runnable {
     public void run() {
         Jedis jedis = new Jedis(jedisHost, jedisPort, 10000);
         jedis.select(tableIndex);
-        Pipeline p = jedis.pipelined();
+        int proccessedRequest = 0;
+//        Pipeline p = jedis.pipelined();
         for (int i=0; i < list.size(); i++) {
             double start = System.nanoTime();
-            p.rpush(list.get(i).getSkierID(), list.get(i).toString());
+            try {
+                jedis.rpush(list.get(i).getSkierID(), list.get(i).toString());
+            } catch (Exception e) {
+                synchronized (this) {
+                    dbQueryTimeCaptureTask.dbQueryErrors++;
+                }
+                e.printStackTrace();
+            }
             dbQueryTimeCaptureTask.addLatency((System.nanoTime() - start) / 1000000);
         }
-        p.sync();
+//        p.sync();
         LOGGER.info("POST list of data, counts: " + list.size() +
                 " at time: " + System.currentTimeMillis() +
-                " on thread: " + Thread.currentThread() +
-                " dbQuery: " + dbQueryTimeCaptureTask.getLatencyList().toString());
+                " on thread: " + Thread.currentThread());
         jedis.close();
     }
 }
