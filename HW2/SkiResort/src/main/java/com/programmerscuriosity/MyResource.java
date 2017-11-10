@@ -3,6 +3,7 @@ package com.programmerscuriosity;
 import model.MyRecord;
 import model.VertData;
 import redis.clients.jedis.Jedis;
+import utility.Calculator;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -12,15 +13,15 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static utility.DataVariables.jedisHost;
-import static utility.DataVariables.jedisPort;
-import static utility.DataVariables.splitStr;
+import static utility.DataVariables.*;
 
 
 @Path("myresource")
 public class MyResource {
 
     CacheTask cacheTask = new CacheTask();
+    DbQueryTimeCaptureTask dbQueryTimeCaptureTask = new DbQueryTimeCaptureTask();
+
 
     /**
      * To retrieve a vert record
@@ -71,4 +72,20 @@ public class MyResource {
         return Response.status(201).entity(result).build();
     }
 
+    @GET
+    @Path("/myserver/dbquerytime/metrics")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDbQTMetrics() {
+        List<Double> latencyList = Calculator.sortLatency(dbQueryTimeCaptureTask.getLatencyList());
+        Double median = Calculator.getMedian(latencyList);
+        Double mean = Calculator.getMean(dbQueryTimeCaptureTask.getLatencyList());
+        Double ninetyFiveP = Calculator.get95(latencyList);
+        Double ninetyNineP = Calculator.get99(latencyList);
+        String metrics = "Database Query Time Metrics\n" +
+                "Mean: " + mean + milliseconds + "\n" +
+                "Median: " + median + milliseconds + "\n" +
+                "95 percentile: " + ninetyFiveP + milliseconds+ "\n" +
+                "99 percentile: " + ninetyNineP + milliseconds+ "\n";
+        return Response.status(201).entity(metrics).build();
+    }
 }

@@ -15,6 +15,8 @@ public class BatchInsertTask implements Runnable {
 
     private List<MyRecord> list;
 
+    DbQueryTimeCaptureTask dbQueryTimeCaptureTask = new DbQueryTimeCaptureTask();
+
     public BatchInsertTask(List<MyRecord> list) {
         this.list = list;
     }
@@ -26,12 +28,15 @@ public class BatchInsertTask implements Runnable {
         jedis.select(tableIndex);
         Pipeline p = jedis.pipelined();
         for (int i=0; i < list.size(); i++) {
+            double start = System.nanoTime();
             p.rpush(list.get(i).getSkierID(), list.get(i).toString());
+            dbQueryTimeCaptureTask.addLatency((System.nanoTime() - start) / 1000000);
         }
         p.sync();
         LOGGER.info("POST list of data, counts: " + list.size() +
                 " at time: " + System.currentTimeMillis() +
-                " on thread: " + Thread.currentThread());
+                " on thread: " + Thread.currentThread() +
+                " dbQuery: " + dbQueryTimeCaptureTask.getLatencyList().toString());
         jedis.close();
     }
 }
