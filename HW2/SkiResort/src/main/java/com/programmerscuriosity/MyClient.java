@@ -90,12 +90,14 @@ public class MyClient {
         int successfulRequestFromPost = 0;
         int failedRequestFromPost = 0;
         Map<Long, Double> latencyListFromPost = new HashMap<>();
+        Map<Long, Double> requestsPerSecFromPOST = new HashMap<>();
         for (Future<Result> result : resultsFromPost) {
             try {
                 numberRequestsFromPost += result.get().getNumberRequests();
                 successfulRequestFromPost += result.get().getSuccessfulRequests();
                 latencyListFromPost.putAll(result.get().getLatency());
                 failedRequestFromPost += result.get().getFailedRequest();
+                requestsPerSecFromPOST.putAll(result.get().getRequestsPerSecond());
             } catch (Exception e) {
                 System.out.print("Errors: " + e.getMessage());
             }
@@ -117,12 +119,14 @@ public class MyClient {
 //        int successfulRequestFromGet = 0;
 //        int failedRequestFromGet = 0;
 //        Map<Long, Double> latencyListFromGet = new HashMap<>();
+//        Map<Long, Double> requestsPerSecFromGET= new HashMap<>();
 //        for (Future<Result> result : resultsFromGet) {
 //            if(result.get() != null) {
 //                numberRequestsFromGet += result.get().getNumberRequests();
 //                successfulRequestFromGet += result.get().getSuccessfulRequests();
 //                latencyListFromGet.putAll(result.get().getLatency());
 //                failedRequestFromGet += result.get().getFailedRequest();
+//                requestsPerSecFromGET.putAll(result.get().getRequestsPerSecond());
 //            }
 //        }
 //        statisticsFromGet.setLatency(latencyListFromGet);
@@ -140,15 +144,25 @@ public class MyClient {
         LOGGER.info("GET all vert data takes: " + wallTime + milliseconds);
         //create a chart based on the list of latency data
         System.out.println("Generating charts...");
-//        DataChart dataChart = new DataChart("POST", xAxis,
-//                yAxis, imageHeight, imageWidth,
-//                "/Users/danni/Desktop/POSTLineChart.jpeg", latencyListFromPost);
-//        dataChart.createChart();
+        DataChart dataChart = new DataChart("POST", "Time in Milliseconds",
+                "Latency", imageHeight, imageWidth,
+                "/Users/danni/Desktop/POSTLineChart.jpeg", latencyListFromPost);
+        dataChart.createChart();
 
-//        DataChart dataChartForGet = new DataChart("GET", xAxis,
-//                yAxis, imageHeight, imageWidth,
+        DataChart dataChartOne = new DataChart("Requests per Second", "Time in Seconds",
+                "Requests", imageHeight, imageWidth,
+                "/Users/danni/Desktop/POSTRequestPerSecChart.jpeg", requestsPerSecFromPOST);
+        dataChartOne.createChart();
+
+//        DataChart dataChartForGet = new DataChart("GET", "Time in Milliseconds",
+//                "Latency", imageHeight, imageWidth,
 //                "/Users/danni/Desktop/GETLineChart.jpeg", latencyListFromGet);
 //        dataChartForGet.createChart();
+//
+//        DataChart dataChartTwo = new DataChart("Requests per Second", "Time in Seconds",
+//                "Requests", imageHeight, imageWidth,
+//                "/Users/danni/Desktop/GETRequestPerSecChart.jpeg", requestsPerSecFromGET);
+//        dataChartTwo.createChart();
 
     }
 

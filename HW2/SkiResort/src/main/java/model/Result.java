@@ -13,6 +13,7 @@ public class Result {
     private Map<Long, Double> latency;
     private int failedRequest;
     private List<MyRecord> failedRequestDetail;
+    private Map<Long, Double> requestsPerSecond;
 
 
     public Result() {
@@ -22,6 +23,7 @@ public class Result {
         latency = new HashMap<>();
         failedRequest = 0;
         failedRequestDetail = new ArrayList<>();
+        requestsPerSecond = new HashMap<>();
     }
 
     public void addNumberRequest() {
@@ -86,5 +88,13 @@ public class Result {
 
     public void setFailedRequestDetail(List<MyRecord> failedRequestDetail) {
         this.failedRequestDetail = failedRequestDetail;
+    }
+
+    public Map<Long, Double> getRequestsPerSecond() {
+        return requestsPerSecond;
+    }
+
+    public void setRequestsPerSecond(Map<Long, Double> requestsPerSecond) {
+        this.requestsPerSecond = requestsPerSecond;
     }
 }

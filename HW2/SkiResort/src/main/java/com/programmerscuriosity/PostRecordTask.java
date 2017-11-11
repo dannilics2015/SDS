@@ -43,6 +43,7 @@ public class PostRecordTask implements Callable<Result> {
             long threadEndTime = System.currentTimeMillis();
             double latency = threadEndTime - threadStartTime;
             statistics.getLatency().put(threadStartTime, latency);
+            addRequestPerSec(threadEndTime/1000);
             response.close();
         } catch (Exception e) {
 //            synchronized (this) {
@@ -76,5 +77,15 @@ public class PostRecordTask implements Callable<Result> {
         }
         client.close();
         return statistics;
+    }
+
+    private void addRequestPerSec(Long currentTimeInSec) {
+        if (statistics.getRequestsPerSecond().get(currentTimeInSec) == null) {
+            statistics.getRequestsPerSecond().put(currentTimeInSec, new Double(1));
+        } else {
+            statistics.getRequestsPerSecond().put(currentTimeInSec,
+                    statistics.getRequestsPerSecond().get(currentTimeInSec) + 1);
+
+        }
     }
 }
