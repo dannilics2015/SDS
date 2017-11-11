@@ -37,6 +37,7 @@ public class MyResource {
         List<String> myRecords = new ArrayList<>();
         try {
             Jedis jedis = new Jedis(jedisHost, jedisPort, 600000);
+            jedis.select(Integer.valueOf(dayNum));
             double start = System.nanoTime();
             myRecords = jedis.lrange(skierID, 0, -1);
             dbQueryTimeCaptureTask.addGETLatency((System.nanoTime() - start) / 1000000);

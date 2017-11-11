@@ -11,10 +11,10 @@ public class DataVariables {
     public static String milliseconds = " milliseconds";
     public static String splitStr = ",";
 
-    public static int skierCounts = 300;
-    public static int recordCounts = 600;
-    public static String dayOfRecord = "1";
-    public static int tableIndex = 1;
+    public static int skierCounts = 10000;
+    public static int recordCounts = 200000;
+    public static String dayOfRecord = "3";
+    public static int tableIndex = 3;
     public static final String xAxis = "Time";
     public static final String yAxis = "Latency";
     public static final int imageHeight = 800;
@@ -23,7 +23,7 @@ public class DataVariables {
 
     public static final String jedisHost = "172.31.12.41";
     public static final int jedisPort = 6379;
-    public static int maxBatchSize = 100;
+    public static int maxBatchSize = 1000;
 
 
     public static String GETURL = "SimpleJersey_war/rest/myresource/myvert";
