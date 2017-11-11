@@ -2,8 +2,11 @@ package com.programmerscuriosity;
 
 import model.MyRecord;
 import model.VertData;
+import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import utility.Calculator;
+import utility.DataVariables;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -36,12 +39,16 @@ public class MyResource {
         VertData myVert = new VertData();
         List<String> myRecords = new ArrayList<>();
         try {
-            Jedis jedis = new Jedis(jedisHost, jedisPort, 600000);
-            jedis.select(Integer.valueOf(dayNum));
+//            Jedis jedis = new Jedis(jedisHost, jedisPort, 600000);
+            JedisCluster jedisCluster = new JedisCluster(new HostAndPort(DataVariables.jedisHost, DataVariables.jedisPort));
+//            jedis.select(Integer.valueOf(dayNum));
             double start = System.nanoTime();
-            myRecords = jedis.lrange(skierID, 0, -1);
+//            myRecords = jedis.lrange(skierID, 0, -1);
+//            System.out.print("Before jedis cluster read..");
+            myRecords = jedisCluster.lrange(skierID, 0, -1);
+//            System.out.print("After jedis cluster read..");
             dbQueryGETCaptureTask.addGETresponseTime((System.nanoTime() - start) / 1000000);
-            jedis.close();
+//            jedis.close();
         } catch(Exception e) {
             synchronized (this) {
                 DbQueryGETCaptureTask.dbQueryErrorsFromGET++;
@@ -84,32 +91,32 @@ public class MyResource {
     public Response getDbQTMetrics() {
         //POST
 //        System.out.print("DBquerysize: " + dbQueryPOSTCaptureTask.getDbPOSTQueryLatencyList().size());
-        List<Double> latencyList = Calculator.sortLatency(Calculator.toList(dbQueryPOSTCaptureTask.getQueue()));
-        Double median = Calculator.getMedian(latencyList);
-        Double mean = Calculator.getMean(latencyList);
-        Double ninetyFiveP = Calculator.get95(latencyList);
-        Double ninetyNineP = Calculator.get99(latencyList);
+//        List<Double> latencyList = Calculator.sortLatency(Calculator.toList(dbQueryPOSTCaptureTask.getQueue()));
+//        Double median = Calculator.getMedian(latencyList);
+//        Double mean = Calculator.getMean(latencyList);
+//        Double ninetyFiveP = Calculator.get95(latencyList);
+//        Double ninetyNineP = Calculator.get99(latencyList);
         //GET
-//        System.out.print("DBquerysize: " + dbQueryGETCaptureTask.getQueue().size() + "Data: " +
-//        dbQueryGETCaptureTask.getQueue().toString());
-//        List<Double> latencyListGET = Calculator.sortLatency(Calculator.toList(dbQueryGETCaptureTask.getQueue()));
-//        Double medianForGET = Calculator.getMedian(latencyListGET);
-//        Double meanForGET = Calculator.getMean(latencyListGET);
-//        Double ninetyFivePForGET = Calculator.get95(latencyListGET);
-//        Double ninetyNinePForGET = Calculator.get99(latencyListGET);
+        System.out.print("DBquerysize: " + dbQueryGETCaptureTask.getQueue().size() + "Data: " +
+        dbQueryGETCaptureTask.getQueue().toString());
+        List<Double> latencyListGET = Calculator.sortLatency(Calculator.toList(dbQueryGETCaptureTask.getQueue()));
+        Double medianForGET = Calculator.getMedian(latencyListGET);
+        Double meanForGET = Calculator.getMean(latencyListGET);
+        Double ninetyFivePForGET = Calculator.get95(latencyListGET);
+        Double ninetyNinePForGET = Calculator.get99(latencyListGET);
         String metrics = "Database Query Time Metrics\n" +
-                "POST Method\n" +
-                "Mean: " + mean + milliseconds + "\n" +
-                "Median: " + median + milliseconds + "\n" +
-                "95 percentile: " + ninetyFiveP + milliseconds+ "\n" +
-                "99 percentile: " + ninetyNineP + milliseconds+ "\n" +
-                "Numbers of errors: " + dbQueryPOSTCaptureTask.getDbQueryErrors() + "\n\n";
-//                "GET Method\n" +
-//                "Mean: " + meanForGET + milliseconds + "\n" +
-//                "Median: " + medianForGET + milliseconds + "\n" +
-//                "95 percentile: " + ninetyFivePForGET + milliseconds+ "\n" +
-//                "99 percentile: " + ninetyNinePForGET + milliseconds+ "\n" +
-//                "Numbers of errors: " + dbQueryGETCaptureTask.getDbQueryErrorsFromGET() + "\n";
+//                "POST Method\n" +
+//                "Mean: " + mean + milliseconds + "\n" +
+//                "Median: " + median + milliseconds + "\n" +
+//                "95 percentile: " + ninetyFiveP + milliseconds+ "\n" +
+//                "99 percentile: " + ninetyNineP + milliseconds+ "\n" +
+//                "Numbers of errors: " + dbQueryPOSTCaptureTask.getDbQueryErrors() + "\n\n";
+                "GET Method\n" +
+                "Mean: " + meanForGET + milliseconds + "\n" +
+                "Median: " + medianForGET + milliseconds + "\n" +
+                "95 percentile: " + ninetyFivePForGET + milliseconds+ "\n" +
+                "99 percentile: " + ninetyNinePForGET + milliseconds+ "\n" +
+                "Numbers of errors: " + dbQueryGETCaptureTask.getDbQueryErrorsFromGET() + "\n";
         return Response.status(201).entity(metrics).build();
     }
 
