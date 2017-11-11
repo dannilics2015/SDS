@@ -19,9 +19,9 @@ public class DataChart {
     private int imageHeight;
     private int imageWidth;
     private String outputFileName;
-    private Map<Long, Long> data;
+    private Map<Long, Double> data;
 
-    public DataChart(String application_title, String xAxisLable, String yAxisLable, int imageHeight, int imageWidth, String outputFileName, Map<Long, Long> data) {
+    public DataChart(String application_title, String xAxisLable, String yAxisLable, int imageHeight, int imageWidth, String outputFileName, Map<Long, Double> data) {
         this.application_title = application_title;
         this.xAxisLable = xAxisLable;
         this.yAxisLable = yAxisLable;
@@ -39,10 +39,10 @@ public class DataChart {
         ChartUtilities.saveChartAsJPEG(lineChart ,lineChartObject, imageWidth ,imageHeight);
     }
 
-    private XYSeriesCollection createDataset(Map<Long, Long> latencies) {
+    private XYSeriesCollection createDataset(Map<Long, Double> latencies) {
         XYSeriesCollection dataset = new XYSeriesCollection();
         XYSeries xySeries = new XYSeries("latency");
-        latencies.forEach((Long key, Long value) ->
+        latencies.forEach((Long key, Double value) ->
                 xySeries.add(key, value));
         dataset.addSeries(xySeries);
         return dataset;

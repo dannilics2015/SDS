@@ -41,13 +41,15 @@ public class PostRecordTask implements Callable<Result> {
             long threadStartTime = System.currentTimeMillis();
             response = webTarget.path(POSTURL).request().post(Entity.json(myRecords.get(index)));
             long threadEndTime = System.currentTimeMillis();
-            long latency = threadEndTime - threadStartTime;
+            double latency = threadEndTime - threadStartTime;
             statistics.getLatency().put(threadStartTime, latency);
             response.close();
         } catch (Exception e) {
-            synchronized (this) {
-                ServerErrorCaptureTask.errorsFromPost++;
-            }
+//            synchronized (this) {
+//                ServerErrorCaptureTask.errorsFromPost++;
+//            }
+            statistics.addFailedRequest();
+            statistics.addFailedRequestDetail(myRecords.get(index));
             LOGGER.warning("Exception Error message: " + e.getMessage());
 //            e.printStackTrace();
         }
@@ -68,7 +70,6 @@ public class PostRecordTask implements Callable<Result> {
             } catch (ProcessingException e) {
                 System.out.print(e.getMessage());
             }
-
             if (response != null && response.getStatus() == 201) {
                 statistics.addSuccessfulRequest();
             }

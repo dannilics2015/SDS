@@ -3,6 +3,7 @@ package com.programmerscuriosity;
 import com.google.common.collect.Queues;
 import model.MyRecord;
 import model.Result;
+import utility.Calculator;
 import utility.DataChart;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class MyClient {
 
     private static BlockingQueue<MyRecord> blockingQueue = new LinkedBlockingQueue<>();
+
 
     private final static Logger LOGGER = Logger.getLogger(MyClient.class.getName());
 
@@ -86,12 +88,14 @@ public class MyClient {
         //Collect POST statistics
         int numberRequestsFromPost = 0;
         int successfulRequestFromPost = 0;
-        Map<Long, Long> latencyListFromPost = new HashMap<>();
+        int failedRequestFromPost = 0;
+        Map<Long, Double> latencyListFromPost = new HashMap<>();
         for (Future<Result> result : resultsFromPost) {
             try {
                 numberRequestsFromPost += result.get().getNumberRequests();
                 successfulRequestFromPost += result.get().getSuccessfulRequests();
                 latencyListFromPost.putAll(result.get().getLatency());
+                failedRequestFromPost += result.get().getFailedRequest();
             } catch (Exception e) {
                 System.out.print("Errors: " + e.getMessage());
             }
@@ -99,57 +103,38 @@ public class MyClient {
         statisticsFromPost.setLatency(latencyListFromPost);
         statisticsFromPost.setNumberRequests(numberRequestsFromPost);
         statisticsFromPost.setSuccessfulRequests(successfulRequestFromPost);
+        statisticsFromPost.setFailedRequest(failedRequestFromPost);
 
-        //get mean & median
-        OptionalDouble meanLatenciesFromPost = latencyListFromPost.values().stream().mapToDouble(l -> l).average();
-        List<Object> sortedLatencyListFromPost = sortLatency(latencyListFromPost.values());
-        Long medianFromPost = getMedian(sortedLatencyListFromPost);
+        String postStatisticsMSG =
+                outputStatistics(collectionToList(latencyListFromPost.values()), "POST", statisticsFromPost);
 
-        LOGGER.info("Processed number of records: " + recordCounts + "\n" +
-                "number of POST requests sent: " + statisticsFromPost.getNumberRequests()+ "\n" +
-                "number of successful POST requests sent: " + statisticsFromPost.getSuccessfulRequests() + "\n" +
-                "The mean latencies for all POSt requests is: " +
-                String.format("%.1f", meanLatenciesFromPost.getAsDouble()) + milliseconds + "\n" +
-                "The median latencies for all POST requests is: " + medianFromPost + milliseconds + "\n" +
-                "The 95th percentile latency is: " +
-                sortedLatencyListFromPost.get((int) (sortedLatencyListFromPost.size() * 0.95)) + milliseconds + "\n" +
-                "The 99th percentile latency is: " +
-                sortedLatencyListFromPost.get((int) (sortedLatencyListFromPost.size() * 0.99)) + milliseconds + "\n" +
-                "number of error requests is: " + ServerErrorCaptureTask.errorsFromPost);
+        LOGGER.info(postStatisticsMSG);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        //Collect GET statistics
+//        //Collect GET statistics
         int numberRequestsFromGet = 0;
         int successfulRequestFromGet = 0;
-        Map<Long, Long> latencyListFromGet = new HashMap<>();
+        int failedRequestFromGet = 0;
+        Map<Long, Double> latencyListFromGet = new HashMap<>();
         for (Future<Result> result : resultsFromGet) {
             if(result.get() != null) {
                 numberRequestsFromGet += result.get().getNumberRequests();
                 successfulRequestFromGet += result.get().getSuccessfulRequests();
                 latencyListFromGet.putAll(result.get().getLatency());
+                failedRequestFromGet += result.get().getFailedRequest();
             }
         }
         statisticsFromGet.setLatency(latencyListFromGet);
         statisticsFromGet.setNumberRequests(numberRequestsFromGet);
         statisticsFromGet.setSuccessfulRequests(successfulRequestFromGet);
+        statisticsFromGet.setFailedRequest(failedRequestFromGet);
 
         //get mean & median
-        OptionalDouble meanLatenciesFromGet = latencyListFromGet.values().stream().mapToDouble(l -> l).average();
-        List<Object> sortedLatencyListFromGet = sortLatency(latencyListFromGet.values());
-        Long medianFromGet = getMedian(sortedLatencyListFromGet);
+        String getStatisticsMSG =
+                outputStatistics(collectionToList(latencyListFromGet.values()), "GeE", statisticsFromGet);
 
-        LOGGER.info("All threads completed..." + "\n" +
-                "number of GET requests sent: " + statisticsFromGet.getNumberRequests()+ "\n" +
-                "number of successful GET requests sent: " + statisticsFromGet.getSuccessfulRequests() + "\n" +
-                "The mean latencies for all GET requests is: " +
-                String.format("%.1f", meanLatenciesFromGet.getAsDouble()) + milliseconds + "\n" +
-                "The median latencies for all GET requests is: " + medianFromGet + milliseconds + "\n" +
-                "The 95th percentile latency is: " +
-                sortedLatencyListFromGet.get((int) (sortedLatencyListFromGet.size() * 0.95)) + milliseconds + "\n" +
-                "The 99th percentile latency is: " +
-                sortedLatencyListFromGet.get((int) (sortedLatencyListFromGet.size() * 0.99)) + milliseconds + "\n" +
-                "number of error requests is: " + ServerErrorCaptureTask.errorsFromGet);
+        LOGGER.info(getStatisticsMSG);
 
         LOGGER.info("POST all skier data & GET all vert data takes: " + wallTime + milliseconds);
 
@@ -168,22 +153,27 @@ public class MyClient {
     }
 
 
-    /**
-     * Get the median number, given a list
-     *
-     * @param data a list stores all the latency data
-     * @return a double
-     */
-    private static Long getMedian(List<Object> data) {
-        if (data.size() % 2 == 0) {
-            return ((Long)data.get((data.size() / 2 - 1)) + (Long)data.get((data.size() / 2))) / 2;
-        }
-        return (Long)data.get(data.size() / 2);
+    private static String outputStatistics(List<Double> unsortedDataList, String requestType, Result statistics) {
+        //Calculate statics
+        List<Double> sortedDataList = Calculator.sortLatency(unsortedDataList);
+        Double meanLatencies = Calculator.getMean(sortedDataList);
+        Double median = Calculator.getMedian(sortedDataList);
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder.append("All threads completed..." + "\n")
+                .append("Operation type: " + requestType)
+                .append("number of requests sent: " + statistics.getNumberRequests()+ "\n")
+                .append("number of successful requests sent: " + statistics.getSuccessfulRequests() + "\n")
+                .append("The mean latencies for all requests is: " +
+                        String.format("%.1f", meanLatencies) + milliseconds + "\n")
+                .append("The median latencies for all GET requests is: " + median + milliseconds + "\n")
+                .append("The 95th percentile latency is: " +
+                        sortedDataList.get((int) (sortedDataList.size() * 0.95)) + milliseconds + "\n")
+                .append("The 99th percentile latency is: " +
+                        sortedDataList.get((int) (sortedDataList.size() * 0.99)) + milliseconds + "\n")
+                .append("number of error requests is: " + statistics.getFailedRequest()).toString();
     }
 
-    private static List<Object> sortLatency(Collection<Long> latencyList) {
-        Object[] data = latencyList.toArray();
-        Arrays.sort(data);
-        return Arrays.asList(data);
+    private static List<Double> collectionToList(Collection<Double> collection) {
+        return new ArrayList<>(collection);
     }
 }

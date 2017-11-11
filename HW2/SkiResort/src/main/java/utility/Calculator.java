@@ -3,6 +3,8 @@ package utility;
 import java.util.*;
 
 public class Calculator {
+
+
     public static List<Double> sortLatency(List<Double> latencyList) {
         Collections.sort(latencyList);
         return latencyList;
@@ -21,16 +23,12 @@ public class Calculator {
         return data.get(data.size() / 2);
     }
 
-    public static OptionalDouble getMean(Map<Long, Long> latencyList) {
-        return latencyList.values().stream().mapToDouble(l -> l).average();
-    }
-
-    public static Double getMean(List<Double> dbQueryLatencyList) {
+    public static Double getMean(List<Double> doubleList) {
         double sum = 0;
-        for (Double d: dbQueryLatencyList) {
+        for (Double d: doubleList) {
             sum += d;
         }
-        return sum/dbQueryLatencyList.size();
+        return sum/doubleList.size();
     }
 
     public static Double get95 (List<Double> data) {

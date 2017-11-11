@@ -1,5 +1,6 @@
 package com.programmerscuriosity;
 
+import model.MyRecord;
 import model.Result;
 import model.VertRequest;
 import org.glassfish.jersey.client.ClientConfig;
@@ -41,15 +42,20 @@ public class GetVertTask implements Callable<Result> {
             long threadStartTime = System.currentTimeMillis();
             response = webTarget.path(getURL).request().get();
             long threadEndTime = System.currentTimeMillis();
-            long latency = threadEndTime - threadStartTime;
+            double latency = threadEndTime - threadStartTime;
             statistics.getLatency().put(threadStartTime, latency);
             response.close();
 
         } catch (ProcessingException e) {
-            synchronized (this) {
-                ServerErrorCaptureTask.errorsFromGet++;
-            }
-            LOGGER.warning("Error message: " + e.getMessage());
+//            synchronized (this) {
+//                ServerErrorCaptureTask.errorsFromGet++;
+//            }
+            statistics.addFailedRequest();
+            MyRecord myRecord = new MyRecord();
+            myRecord.setSkierID(vertRequest.getSkierID());
+            myRecord.setDayNum(vertRequest.getDayNum());
+            statistics.addFailedRequestDetail(myRecord);
+            LOGGER.warning("Exception Error message: " + e.getMessage());
         }
         return response;
     }
