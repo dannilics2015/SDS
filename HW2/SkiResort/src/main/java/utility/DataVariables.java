@@ -2,12 +2,12 @@ package utility;
 
 public class DataVariables {
 
-    public static int threadNumber = 80;
+    public static int threadNumber = 100;
     public static int iterationNumber = 100;
     public static String ipAddress = "http://52.43.144.251";
     public static String port = "8080";
     public static String ip = ipAddress.concat(":").concat(port);
-    public static String fileName = "/Users/danni/Desktop/CS6650/Assignment#2/BSDSAssignment2Day999.csv";
+    public static String fileName = "/Users/danni/Desktop/CS6650/Assignment#2/BSDSAssignment2Day3.csv";
     public static String milliseconds = " milliseconds";
     public static String splitStr = ",";
 

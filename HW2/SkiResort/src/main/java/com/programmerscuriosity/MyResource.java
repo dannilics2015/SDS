@@ -80,30 +80,31 @@ public class MyResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDbQTMetrics() {
         //POST
+        System.out.print("DBquerysize: " +dbQueryTimeCaptureTask.getDbPOSTQueryLatencyList().size());
         List<Double> latencyList = Calculator.sortLatency(dbQueryTimeCaptureTask.getDbPOSTQueryLatencyList());
         Double median = Calculator.getMedian(latencyList);
         Double mean = Calculator.getMean(latencyList);
         Double ninetyFiveP = Calculator.get95(latencyList);
         Double ninetyNineP = Calculator.get99(latencyList);
         //GET
-        List<Double> latencyListGET = Calculator.sortLatency(dbQueryTimeCaptureTask.getDbGETQueryLatencyList());
-        Double medianForGET = Calculator.getMedian(latencyListGET);
-        Double meanForGET = Calculator.getMean(latencyListGET);
-        Double ninetyFivePForGET = Calculator.get95(latencyListGET);
-        Double ninetyNinePForGET = Calculator.get99(latencyListGET);
+//        List<Double> latencyListGET = Calculator.sortLatency(dbQueryTimeCaptureTask.getDbGETQueryLatencyList());
+//        Double medianForGET = Calculator.getMedian(latencyListGET);
+//        Double meanForGET = Calculator.getMean(latencyListGET);
+//        Double ninetyFivePForGET = Calculator.get95(latencyListGET);
+//        Double ninetyNinePForGET = Calculator.get99(latencyListGET);
         String metrics = "Database Query Time Metrics\n" +
                 "POST Method\n" +
                 "Mean: " + mean + milliseconds + "\n" +
                 "Median: " + median + milliseconds + "\n" +
                 "95 percentile: " + ninetyFiveP + milliseconds+ "\n" +
                 "99 percentile: " + ninetyNineP + milliseconds+ "\n" +
-                "Numbers of errors: " + dbQueryTimeCaptureTask.getDbQueryErrors() + "\n\n" +
-                "GET Method\n" +
-                "Mean: " + meanForGET + milliseconds + "\n" +
-                "Median: " + medianForGET + milliseconds + "\n" +
-                "95 percentile: " + ninetyFivePForGET + milliseconds+ "\n" +
-                "99 percentile: " + ninetyNinePForGET + milliseconds+ "\n" +
-                "Numbers of errors: " + dbQueryTimeCaptureTask.getDbQueryErrorsFromGET() + "\n";
+                "Numbers of errors: " + dbQueryTimeCaptureTask.getDbQueryErrors() + "\n\n";
+//                "GET Method\n" +
+//                "Mean: " + meanForGET + milliseconds + "\n" +
+//                "Median: " + medianForGET + milliseconds + "\n" +
+//                "95 percentile: " + ninetyFivePForGET + milliseconds+ "\n" +
+//                "99 percentile: " + ninetyNinePForGET + milliseconds+ "\n" +
+//                "Numbers of errors: " + dbQueryTimeCaptureTask.getDbQueryErrorsFromGET() + "\n";
         return Response.status(201).entity(metrics).build();
     }
 }

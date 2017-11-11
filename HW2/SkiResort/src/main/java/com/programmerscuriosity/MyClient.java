@@ -59,10 +59,10 @@ public class MyClient {
             Queues.drain(blockingQueue, myRecordList, iterationNumber, 10000, MILLISECONDS);
             postRecordTasks.add(new PostRecordTask(iterationNumber, ip, myRecordList));
         }
-        // GET
-        for (int i = 0; i < skierCounts / iterationNumber; i++) {
-            getVertTasks.add(new GetVertTask(iterationNumber, ip, dayOfRecord,i * 100 + 1));
-        }
+//        // GET
+//        for (int i = 0; i < skierCounts / iterationNumber; i++) {
+//            getVertTasks.add(new GetVertTask(iterationNumber, ip, dayOfRecord,i * 100 + 1));
+//        }
         // invoke POST and collect results
         try {
             for (Future<Result> task: executor.invokeAll(postRecordTasks)) {
@@ -72,13 +72,13 @@ public class MyClient {
             LOGGER.warning(e.getMessage());
         }
         // invoke GET and collect results
-        try {
-            for (Future<Result> task: executor.invokeAll(getVertTasks)) {
-                resultsFromGet.add(task);
-            }
-        } catch (InterruptedException e) {
-            LOGGER.warning(e.getMessage());
-        }
+//        try {
+//            for (Future<Result> task: executor.invokeAll(getVertTasks)) {
+//                resultsFromGet.add(task);
+//            }
+//        } catch (InterruptedException e) {
+//            LOGGER.warning(e.getMessage());
+//        }
         executor.shutdown();
         while(!executor.isTerminated()){}
 
@@ -113,28 +113,28 @@ public class MyClient {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //        //Collect GET statistics
-        int numberRequestsFromGet = 0;
-        int successfulRequestFromGet = 0;
-        int failedRequestFromGet = 0;
-        Map<Long, Double> latencyListFromGet = new HashMap<>();
-        for (Future<Result> result : resultsFromGet) {
-            if(result.get() != null) {
-                numberRequestsFromGet += result.get().getNumberRequests();
-                successfulRequestFromGet += result.get().getSuccessfulRequests();
-                latencyListFromGet.putAll(result.get().getLatency());
-                failedRequestFromGet += result.get().getFailedRequest();
-            }
-        }
-        statisticsFromGet.setLatency(latencyListFromGet);
-        statisticsFromGet.setNumberRequests(numberRequestsFromGet);
-        statisticsFromGet.setSuccessfulRequests(successfulRequestFromGet);
-        statisticsFromGet.setFailedRequest(failedRequestFromGet);
-
-        //get mean & median
-        String getStatisticsMSG =
-                outputStatistics(collectionToList(latencyListFromGet.values()), "GeE", statisticsFromGet);
-
-        LOGGER.info(getStatisticsMSG);
+//        int numberRequestsFromGet = 0;
+//        int successfulRequestFromGet = 0;
+//        int failedRequestFromGet = 0;
+//        Map<Long, Double> latencyListFromGet = new HashMap<>();
+//        for (Future<Result> result : resultsFromGet) {
+//            if(result.get() != null) {
+//                numberRequestsFromGet += result.get().getNumberRequests();
+//                successfulRequestFromGet += result.get().getSuccessfulRequests();
+//                latencyListFromGet.putAll(result.get().getLatency());
+//                failedRequestFromGet += result.get().getFailedRequest();
+//            }
+//        }
+//        statisticsFromGet.setLatency(latencyListFromGet);
+//        statisticsFromGet.setNumberRequests(numberRequestsFromGet);
+//        statisticsFromGet.setSuccessfulRequests(successfulRequestFromGet);
+//        statisticsFromGet.setFailedRequest(failedRequestFromGet);
+//
+//        //get mean & median
+//        String getStatisticsMSG =
+//                outputStatistics(collectionToList(latencyListFromGet.values()), "GET", statisticsFromGet);
+//
+//        LOGGER.info(getStatisticsMSG);
 
         LOGGER.info("POST all skier data & GET all vert data takes: " + wallTime + milliseconds);
 
@@ -145,10 +145,10 @@ public class MyClient {
                 "/Users/danni/Desktop/POSTLineChart.jpeg", latencyListFromPost);
         dataChart.createChart();
 
-        DataChart dataChartForGet = new DataChart("GET", xAxis,
-                yAxis, imageHeight, imageWidth,
-                "/Users/danni/Desktop/GETLineChart.jpeg", latencyListFromGet);
-        dataChartForGet.createChart();
+//        DataChart dataChartForGet = new DataChart("GET", xAxis,
+//                yAxis, imageHeight, imageWidth,
+//                "/Users/danni/Desktop/GETLineChart.jpeg", latencyListFromGet);
+//        dataChartForGet.createChart();
 
     }
 
