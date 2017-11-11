@@ -33,4 +33,5 @@ public class DbQueryTimeCaptureTask {
     public Integer getDbQueryErrorsFromGET() {
         return dbQueryErrorsFromGET;
     }
+
 }

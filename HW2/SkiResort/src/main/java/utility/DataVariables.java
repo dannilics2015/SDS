@@ -2,7 +2,7 @@ package utility;
 
 public class DataVariables {
 
-    public static int threadNumber = 100;
+    public static int threadNumber = 10;
     public static int iterationNumber = 100;
     public static String ipAddress = "http://52.43.144.251";
     public static String port = "8080";
@@ -11,8 +11,8 @@ public class DataVariables {
     public static String milliseconds = " milliseconds";
     public static String splitStr = ",";
 
-    public static int skierCounts = 10000;
-    public static int recordCounts = 200000;
+    public static int skierCounts = 1000;
+    public static int recordCounts = 20000;
     public static String dayOfRecord = "3";
     public static int tableIndex = 3;
     public static final String xAxis = "Time";

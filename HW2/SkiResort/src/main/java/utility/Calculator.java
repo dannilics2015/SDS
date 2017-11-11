@@ -1,6 +1,7 @@
 package utility;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Calculator {
 
@@ -8,6 +9,15 @@ public class Calculator {
     public static List<Double> sortLatency(List<Double> latencyList) {
         Collections.sort(latencyList);
         return latencyList;
+    }
+
+    public static List<Double> toList(ConcurrentLinkedQueue queue) {
+        List<Double> list = new LinkedList<>();
+        Iterator iterator = queue.iterator();
+        while(iterator.hasNext()) {
+            list.add((Double)iterator.next());
+        }
+        return list;
     }
 
     /**
